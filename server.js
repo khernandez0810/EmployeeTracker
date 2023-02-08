@@ -37,13 +37,7 @@ const userPrompt = () => {
         "Add a Department",
         "Add a role",
         "Add an employee",
-        "Update an Employee role",
-        "Delete a Department",
-        "Delete an Employee",
-        "Delete a Role",
-        "View Roles",
-        "View Roles",
-        "View Roles",
+        "Update an Employee Role",
       ],
     },
   ])
@@ -70,15 +64,6 @@ const userPrompt = () => {
         if(userChoice === "Update an Employee Role"){
             updateEmployee();
         }
-        if(userChoice === "Delete a Department"){
-            viewDepartments();
-        }
-        if(userChoice === "Delete an Employee"){
-            viewDepartments();
-        }
-        if(userChoice === "Delete a Role"){
-            viewDepartments();
-        }
     }));
 };
 
@@ -94,7 +79,10 @@ showDepartments = () => {
 
 showEmployees = () => {
     console.log("SHOWING ALL EMPLOYEES");
-    let sql = `SELECT * FROM employee;`;
+    let sql = `SELECT employee.id,
+                employee.first_name,
+                employee.last_name,
+                role_title`;
     connection.query(sql, (err, rows) => {
     if(err) throw err;
     console.table(rows);
@@ -202,7 +190,7 @@ addEmployee = () => {
     inquirer.prompt([
         {
             type:"input",
-            name:"firstName",
+            name:"addFirstName",
             message:"Please enter new employee's first name",
             validate: addFirstName => {
                 if(addFirstName){
@@ -215,7 +203,7 @@ addEmployee = () => {
         },
         {
             type:"input",
-            name:"lastName",
+            name:"addLastName",
             message:"Please enter new employee's last name",
             validate: addLastName => {
                 if(addLastName){
@@ -242,8 +230,8 @@ addEmployee = () => {
            .then(roleChoice => {
             const role = roleChoice.role;
             params.push(role);
-            const manager = `SELECT * FROM employee`;
-            connection.query(manager, (err,data) => {
+            const managerSql = `SELECT * FROM employee`;
+            connection.query(managerSql, (err,data) => {
                 if(err) throw err;
                 const managers = data.map(({id, first_name, last_name}) => ({ name: first_name + " " + last_name, value: id}));
                 inquirer.prompt([
@@ -251,7 +239,7 @@ addEmployee = () => {
                         type:"list",
                         name: "manager",
                         message: "Please choose the employee's manager",
-                        choices: manager
+                        choices: managers
                     }
                 ]).then(chosenManager => {
                     const manager = chosenManager.manager;
@@ -273,8 +261,8 @@ addEmployee = () => {
 }
 
 updateEmployee =()=> {
-    const employeesSql = `SELECT * FROM employees`;
-    connection.query(employees, (err,data) => {
+    const employeesSql = `SELECT * FROM employee`;
+    connection.query(employeesSql, (err,data) => {
         if(err) throw err;
         const employees = data.map(({id, first_name, last_name}) => ({name:first_name + " " + last_name, value: id}));
         inquirer.prompt([
@@ -292,7 +280,29 @@ updateEmployee =()=> {
             connection.query(roleSql, (err,data) => {
                 if(err) throw err;
                 const roles = data.map(({id, title}) => ({name: title, value: id}));
-                
+                inquirer.prompt([
+                    {
+                        type:"list",
+                        name:"role",
+                        role: "What is the employee's role?",
+                        choices: roles
+                    }
+                ]).then(roleChoice => {
+                    const role = roleChoice.role;
+                    params.push(role);
+
+                    let employee = params[0]
+                    params[0] = role
+                    params[1] = employee
+
+
+                    const sql = `UPDATE employee SET role_id = ? WHERE id = ?`;
+                    connection.query(sql, params, (err,results) => {
+                        if(err) throw err;
+                        console.log("chosen employee has been updated");
+                        showEmployees();
+                    })
+                })
             })
         })
     })
