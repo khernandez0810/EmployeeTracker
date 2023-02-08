@@ -1,9 +1,11 @@
+//import needed files and packages
+
 const mysql = require("mysql2");
 const inquirer = require("inquirer");
 const consoleTable = require("console-table");
 
 require("dotenv").config();
-
+//-----------connect to mysql using .env
 const connection = mysql.createConnection({
   host: "localhost",
   user: process.env.SQL_USER,
@@ -15,13 +17,14 @@ connection.connect((err) => {
   if (err) throw err;
   postConnect();
 });
-
+//--------log message showing application is loaded
 postConnect = () => {
   console.log("*                                  *");
   console.log("*** WELCOME TO EMPLOYEE MANAGER  ***");
   console.log("*                                  *");
   userPrompt();
 };
+//------Initial prompts to user
 const userPrompt = () => {
   inquirer.prompt([
     {
@@ -64,7 +67,7 @@ const userPrompt = () => {
         }
     }));
 };
-
+//---------View all departments-----------
 showDepartments = () => {
     console.log("SHOWING ALL DEPARTMENTS");
     let sql = `SELECT * FROM department;`;
@@ -74,7 +77,7 @@ showDepartments = () => {
         userPrompt();
     });
 };
-
+//---------View all Employees-------------
 showEmployees = () => {
     console.log("SHOWING ALL EMPLOYEES");
     let sql = `SELECT employee.first_name,
@@ -93,6 +96,7 @@ showEmployees = () => {
     userPrompt();
     });
 };
+//---------View all Roles---------------
 showRoles = () => {
     console.log("SHOWING ALL ROLES");
     let sql = `SELECT * FROM role;`;
@@ -102,7 +106,7 @@ showRoles = () => {
         userPrompt();
     });
 };
-
+//---------Add a new Department---------------
 addDepartment = () => {
     inquirer.prompt([
         {
@@ -129,6 +133,9 @@ addDepartment = () => {
             })
     })
 };
+
+
+//---------Add a new Role---------------
 
 addRole = () => {
     inquirer.prompt([
@@ -189,7 +196,7 @@ addRole = () => {
             });
     });
 };
-
+//---------Add new Employee---------------
 addEmployee = () => {
     inquirer.prompt([
         {
@@ -263,6 +270,8 @@ addEmployee = () => {
         });
     })
 }
+
+//---------Update existing employee---------------
 
 updateEmployee =()=> {
     const employeesSql = `SELECT * FROM employee`;
