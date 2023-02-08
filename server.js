@@ -17,11 +17,9 @@ connection.connect((err) => {
 });
 
 postConnect = () => {
-  console.log("************************************");
   console.log("*                                  *");
   console.log("*** WELCOME TO EMPLOYEE MANAGER  ***");
   console.log("*                                  *");
-  console.log("************************************");
   userPrompt();
 };
 const userPrompt = () => {
@@ -79,10 +77,16 @@ showDepartments = () => {
 
 showEmployees = () => {
     console.log("SHOWING ALL EMPLOYEES");
-    let sql = `SELECT employee.id,
-                employee.first_name,
+    let sql = `SELECT employee.first_name,
                 employee.last_name,
-                role_title`;
+                role.title,
+                role.salary,
+                department.department_name,
+                CONCAT (manager.first_name, " " , manager.last_name) AS manager
+                FROM employee
+                    INNER JOIN role ON role.id = employee.role_id
+                    INNER JOIN department ON department.id = role.department_id 
+                    LEFT JOIN employee manager ON employee.manager_id = manager.id`;
     connection.query(sql, (err, rows) => {
     if(err) throw err;
     console.table(rows);
@@ -116,7 +120,7 @@ addDepartment = () => {
         }
     ])
     .then(answer => {
-        let sql = `INSERT INTO department (name)
+        let sql = `INSERT INTO department (department_name)
             VALUES (?)`;
             connection.query(sql, answer.addDepartment, (err, results) => {
                 if(err) throw err;
@@ -157,7 +161,7 @@ addRole = () => {
     ])
     .then(answer => {
         let params = [answer.addRole, answer.addSalary];
-        let roleSql = `SELECT name, id FROM department`;
+        let roleSql = `SELECT department_name, id FROM department`;
             connection.query(roleSql , (err, data) => {
                 if(err) throw err;
                const dept = data.map(({name, id}) => ({ name: name, value: id}));
