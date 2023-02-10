@@ -297,7 +297,7 @@ updateEmployee =()=> {
                     {
                         type:"list",
                         name:"role",
-                        role: "What is the employee's role?",
+                        message: "What is the employee's role?",
                         choices: roles
                     }
                 ]).then(roleChoice => {
